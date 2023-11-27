@@ -1,0 +1,220 @@
+openapi: 3.0.3
+info:
+  title: Java Test Challenge Api
+  description: |-
+    A simple test challenge API that allows to:
+    - calculate the distance between two UK's postcodes
+  version: 1.0-SNAPSHOT
+servers:
+  - url: http://localhost:8080/api/v1
+tags:
+  - name: postcodes
+    description: Operations between UK's postcodes
+  - name: refs
+    description: Reference data in db
+paths:
+  /refs/postcodes:
+    get:
+      tags:
+        - refs
+        - postcodes
+      summary: Get all available postcodes
+      description: get all postcodes with their coordinates
+      operationId: getPostcodes
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: size
+          in: query
+          description: Page size
+          required: false
+          schema:
+            type: integer
+            format: int32
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        404:
+          description: Postcode not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+  /refs/postcodes/{id}:
+    get:
+      tags:
+        - refs
+        - postcodes
+      summary: Get postcode by id
+      description: get postcode with its coordinates by id
+      operationId: getPostcodeById
+      parameters:
+        - name: id
+          in: path
+          description: Postcode id
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        404:
+          description: Postcode not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+    put:
+      tags:
+        - refs
+        - postcodes
+      summary: Update postcode by id
+      description: update postcode with its coordinates by id
+      operationId: updatePostcodeById
+      parameters:
+        - name: id
+          in: path
+          description: Postcode id
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        description: Postcode to update
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Postcodes'
+        required: true
+      responses:
+        204:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        404:
+          description: Postcode not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+  /refs/postcodes/upload:
+    post:
+      tags:
+        - refs
+        - postcodes
+      summary: Upload postcodes
+      description: Upload postcodes with their coordinates
+      operationId: uploadPostcodes
+      requestBody:
+        description: Postcodes to upload
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+        required: true
+      responses:
+        204:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+  /distance/calculate:
+    post:
+      tags:
+        - postcodes
+      summary: Calculate distance between two postcodes
+      description: Calculate distance between two postcodes
+      operationId: calculateDistance
+      requestBody:
+        description: Postcodes to calculate distance
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DistanceRequest'
+        required: true
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        404:
+          description: Postcode not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+components:
+  schemas:
+    SuccessResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        data:
+          type: object
+    Postcodes:
+      type: object
+      properties:
+        postcode:
+          type: string
+        latitude:
+          type: number
+          format: int64
+        longitude:
+          type: number
+          format: int64
+    NotFoundError:
+      type: object
+      properties:
+        message:
+          type: string
+    DistanceRequest:
+      type: object
+      properties:
+        postcode1:
+          type: string
+        postcode2:
+          type: string
+    PostcodeResponse:
+      type: object
+      properties:
+        postcode:
+          type: string
+        latitude:
+          type: number
+          format: int64
+        longitude:
+          type: number
+          format: int64
+    DistanceResponse:
+      type: object
+      properties:
+        distance:
+          type: string
+        postcode1:
+          $ref: '#/components/schemas/PostcodeResponse'
+        postcode2:
+          $ref: '#/components/schemas/PostcodeResponse'
